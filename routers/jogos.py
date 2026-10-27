@@ -87,12 +87,28 @@ def criar_jogo(
 
 @router.get("/", response_model=list[JogoResponseSchema])
 def listar_jogos(
+    nome: str | None = None,
+    plataforma_id: int | None = None,
+    categoria_id: int | None = None,
+    preco_max: float | None = None,
     db: Session = Depends(get_db)
 ):
 
-    jogos = db.query(Jogo).all()
+    consulta = db.query(Jogo)
 
-    return jogos
+    if nome:
+        consulta = consulta.filter(Jogo.nome.ilike(f"%{nome}%"))
+
+    if plataforma_id is not None:
+        consulta = consulta.filter(Jogo.plataforma_id == plataforma_id)
+
+    if categoria_id is not None:
+        consulta = consulta.filter(Jogo.categoria_id == categoria_id)
+
+    if preco_max is not None:
+        consulta = consulta.filter(Jogo.preco <= preco_max)
+
+    return consulta.all()
 
 
 
